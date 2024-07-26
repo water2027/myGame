@@ -84,42 +84,30 @@
             isWin(x, y) {
                 try {
                     const user = this.chessArr[x][y];
+                    let isWinner = false;
+            
                     if (this.chessArr[x][y] === this.chessArr[x][((y + 1) % 3+3)%3] && this.chessArr[x][y] === this.chessArr[x][((y + 2) % 3+3)%3]) {
-                        this.win = true;
-                        window.onload = ()=>{
-                            alert(user + 'win');
+                        isWinner = true;
+                    } else if (this.chessArr[x][y] === this.chessArr[((x + 1) % 3+3)%3][y] && this.chessArr[x][y] === this.chessArr[((x + 2) % 3+3)%3][y]) {
+                        isWinner = true;
+                    } else if (x === y || x === 2-y) {
+                        if (this.chessArr[x][y] === this.chessArr[((x + 1) % 3+3)%3][((y + 1) % 3+3)%3] && this.chessArr[x][y] === this.chessArr[((x + 2) % 3+3)%3][((y + 2) % 3+3)%3]) {
+                            isWinner = true;
+                        } else if (this.chessArr[x][y] === this.chessArr[((x + 1) % 3+3)%3][((y - 1) % 3+3)%3] && this.chessArr[x][y] === this.chessArr[((x + 2) % 3+3)%3][((y - 2) % 3+3)%3]) {
+                            isWinner = true;
                         }
-                        return
                     }
-                    if (this.chessArr[x][y] === this.chessArr[((x + 1) % 3+3)%3][y] && this.chessArr[x][y] === this.chessArr[((x + 2) % 3+3)%3][y]) {
+            
+                    if (isWinner) {
                         this.win = true;
-                        window.onload = ()=>{
-                            alert(user + 'win');
-                        }
-                        return
+                        requestAnimationFrame(() => {
+                            alert(user + ' wins!');
+                        });
                     }
-                    if(x !==y&&x!==2-y){
-                        return
-                    }
-                    if (this.chessArr[x][y] === this.chessArr[((x + 1) % 3+3)%3][((y + 1) % 3+3)%3] && this.chessArr[x][y] === this.chessArr[((x + 2) % 3+3)%3][((y + 2) % 3+3)%3]) {
-                        this.win = true;
-                        window.onload = ()=>{
-                            alert(user + 'win');
-                        }
-                        return
-                    }
-                    if (this.chessArr[x][y] === this.chessArr[((x + 1) % 3+3)%3][((y - 1) % 3+3)%3] && this.chessArr[x][y] === this.chessArr[((x + 2) % 3+3)%3][((y - 2) % 3+3)%3]) {
-                        this.win = true;
-                        window.onload = ()=>{
-                            alert(user + 'win');
-                        }
-                        return
-                    }
-                }catch(e){
+                } catch(e) {
                     console.log(e);
-                    return
                 }
-            }
+}
         }
         var chess = new chessBorad(100);
         chess.init();
