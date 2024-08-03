@@ -79,6 +79,18 @@ class Background {
         }, 1000);
     }
 
+    stopAndRestart() {
+        //用于暂停与继续游戏
+        if (this.game) {
+            clearInterval(this.game);
+            clearInterval(this.generateInterval);
+            this.game = null;
+            this.generateInterval = null;
+        } else {
+            this.gameStart();
+        }
+    }
+
     tryAgain() {
         Background.totalGraphics = 0;
         this.totalScore = 0;
@@ -168,9 +180,7 @@ class circle extends BaseGraphics {
     }
 }
 
-function main() {
-    let bg = new Background();
-    bg.gameStart();
-}
+let bg = new Background();
+bg.gameStart();
 
-main();
+
