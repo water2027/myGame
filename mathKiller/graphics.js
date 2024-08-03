@@ -38,14 +38,14 @@ class Background {
         if (recOrCir > 0.5) {
             let width = Math.random() * 50 + 50;
             let height = Math.random() * 50 + 50;
-            if(x + width > this.canvas.width) {
-                x = this.canvas.width - width;
+            if (x + width >= this.canvas.width) {
+                x = this.canvas.width - width - 50;
             }
             newGraphics = new Rectangle(x, y, speedX, speedY, score, color, width, height);
         } else {
             let radius = Math.random() * 50 + 20;
-            if(x + radius > this.canvas.width) {
-                x = this.canvas.width - radius;
+            if (x + radius >= this.canvas.width) {
+                x = this.canvas.width - radius - 50;
             }
             newGraphics = new circle(x, y, speedX, speedY, score, color, radius);
         }
