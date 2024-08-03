@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        canvas {
+            display: fixed;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="game"></canvas>
+    <script>
+
+        var canvas = document.getElementById('game');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        class chessBorad {
+            constructor(len) {
+                //len为井字棋格子边长
+                this.len = len * devicePixelRatio;
+                this.ctx = canvas.getContext('2d');
+                this.chessArr = [['', '', ''], ['', '', ''], ['', '', '']];
+                this.win = false;
+            }
+            init() {
+                this.ctx.beginPath();
+                this.ctx.moveTo(centerX - this.len * 3 / 2, centerY - this.len / 2);
+                this.ctx.lineTo(centerX + this.len * 3 / 2, centerY - this.len / 2);
+                this.ctx.stroke();
+                this.ctx.beginPath();
+                this.ctx.moveTo(centerX - this.len * 3 / 2, centerY + this.len / 2);
+                this.ctx.lineTo(centerX + this.len * 3 / 2, centerY + this.len / 2);
+                this.ctx.stroke();
+                this.ctx.beginPath();
+                this.ctx.moveTo(centerX - this.len / 2, centerY - this.len * 3 / 2);
+                this.ctx.lineTo(centerX - this.len / 2, centerY + this.len * 3 / 2);
+                this.ctx.stroke();
+                this.ctx.beginPath();
+                this.ctx.moveTo(centerX + this.len / 2, centerY - this.len * 3 / 2);
+                this.ctx.lineTo(centerX + this.len / 2, centerY + this.len * 3 / 2);
+                this.ctx.stroke();
+            }
+            drawChess(x, y, user) {
+                this.ctx.beginPath();
+                if (user === "X") {
+                    this.ctx.moveTo(centerX + this.len * (x - 1.5), centerY + this.len * (y - 1.5));
+                    this.ctx.lineTo(centerX + this.len * (x - 0.5), centerY + this.len * (y - 0.5));
+                    this.ctx.moveTo(centerX + this.len * (x - 0.5), centerY + this.len * (y - 1.5));
+                    this.ctx.lineTo(centerX + this.len * (x - 1.5), centerY + this.len * (y - 0.5));
+                    this.ctx.stroke();
+                }
+                else {
+                    this.ctx.arc(centerX + this.len * (x - 1), centerY + this.len * (y - 1), this.len / 2, 0, 2 * Math.PI);
+                    this.ctx.stroke();
+                }
+                this.chessArr[x][y] = user;
+            }
+            isInside(x, y) {
+                if (x < centerX - this.len * 3 / 2 || x > centerX + this.len * 3 / 2 || y < centerY - this.len * 3 / 2 || y > centerY + this.len * 3 / 2) {
+                    return {
+                        x: null,
+                        y: null
+                    }
+                }
+                return {
+                    x: Math.floor((x - centerX + this.len / 2) / this.len) + 1,
+                    y: Math.floor((y - centerY + this.len / 2) / this.len) + 1
+                }
+            }
+            isOk(x, y) {
+                if (this.chessArr[x][y] === '' && !this.win) {
+                    return true;
+                }
+                return false;
+            }
+            isWin(x, y) {
+                try {
+                    const user = this.chessArr[x][y];
+                    let isWinner = false;
+
+                    if (this.chessArr[x][y] === this.chessArr[x][((y + 1) % 3 + 3) % 3] && this.chessArr[x][y] === this.chessArr[x][((y + 2) % 3 + 3) % 3]) {
+                        isWinner = true;
+                    } else if (this.chessArr[x][y] === this.chessArr[((x + 1) % 3 + 3) % 3][y] && this.chessArr[x][y] === this.chessArr[((x + 2) % 3 + 3) % 3][y]) {
+                        isWinner = true;
+                    } else if (x === y || x === 2 - y) {
+                        if (this.chessArr[x][y] === this.chessArr[((x + 1) % 3 + 3) % 3][((y + 1) % 3 + 3) % 3] && this.chessArr[x][y] === this.chessArr[((x + 2) % 3 + 3) % 3][((y + 2) % 3 + 3) % 3]) {
+                            isWinner = true;
+                        } else if (this.chessArr[x][y] === this.chessArr[((x + 1) % 3 + 3) % 3][((y - 1) % 3 + 3) % 3] && this.chessArr[x][y] === this.chessArr[((x + 2) % 3 + 3) % 3][((y - 2) % 3 + 3) % 3]) {
+                            isWinner = true;
+                        }
+                    }
+
+                    if (isWinner) {
+                        this.win = true;
+                        setTimeout(() => {
+                            alert(user + ' win');
+                            location.reload();
+                        }, 100);
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+        }
+        var chess = new chessBorad(100);
+        chess.init();
+        var flag = true;
+        canvas.onclick = function (e) {
+            const { x, y } = chess.isInside(e.clientX, e.clientY);
+            if (x === null) {
+                return;
+            }
+            if (chess.isOk(x, y)) {
+                if (flag) {
+                    chess.drawChess(x, y, 'X');
+                } else {
+                    chess.drawChess(x, y, 'O');
+                }
+                chess.isWin(x, y);
+                flag = !flag;
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>
