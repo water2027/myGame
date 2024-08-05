@@ -26,7 +26,6 @@ class Background {
     }
 
     addNewGraphics() {
-
         let x = Math.random() * this.canvas.width;
         let y = 0;
         let speedX = Math.random() * 10 - 5;
@@ -180,7 +179,8 @@ class circle extends BaseGraphics {
     }
 }
 
-let bg = new Background();
-bg.gameStart();
+let background = new Background();
+background.gameStart();
+
 
 

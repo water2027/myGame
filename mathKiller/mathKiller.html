@@ -10,11 +10,17 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
 
         canvas {
             /* 灰色 */
+            width: 100%;
+            height: 100%;
             background: #f0f0f0;
         }
     </style>
@@ -23,7 +29,22 @@
 <body>
     <canvas></canvas>
     <script src="graphics.js"></script>
+    <script>
+        const canvas = document.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        let x = 0;
+        let y = 0;
+        document.onclick = (e)=>{
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(e.clientX, e.clientY);
+            ctx.fillStyle = 'red';
+            ctx.stroke();
+            x = e.clientX;
+            y = e.clientY;
+        }
 
+    </script>
 </body>
 
 </html>

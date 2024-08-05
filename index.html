@@ -1,45 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Example</title>
+    <title>Water's game</title>
+    <link rel="stylesheet" href="./main.css">
 </head>
+
 <body>
-    <h1>WebSocket Example</h1>
-    <button id="sendButton">Send Message</button>
-    <script>
-        // 创建WebSocket连接
-        const ws = new WebSocket('ws://localhost:8080/ws');
-
-        // 连接打开事件
-        ws.onopen = () => {
-            console.log('connected');
-        };
-
-        // 接收到消息事件
-        ws.onmessage = (e) => {
-            console.log('Received:', e.data);
-        };
-
-        // 连接关闭事件
-        ws.onclose = () => {
-            console.log('disconnected');
-        };
-
-        // 连接错误事件
-        ws.onerror = (error) => {
-            console.error('WebSocket Error:', error);
-        };
-
-        // 发送消息
-        document.getElementById('sendButton').onclick = () => {
-            if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({"msg":'Hello, Server!'}));
-            } else {
-                console.log('WebSocket is not open.');
-            }
-        };
-    </script>
+    <div id="app">
+        <h1>Water's game</h1>
+        <header>
+            <p>欢迎来到我的网页。这是游戏主页面。页面很简陋，在我预期里也没有想到你会来这里。</p>
+        </header>
+        <div id="container">
+            <a href="./threeChess/singleThreeChess.html">
+                <div>
+                    <h2>井字棋单人版</h2>
+                    <p>朴实无华的井字棋</p>
+                    <p>2024-7-26 10:53</p>
+                </div>
+            </a>
+            <a href="./mathKiller/mathKiller.html">
+                <div>
+                    <h2>点击图形</h2>
+                    <p>类似水果忍者？做的很简陋，还没改进。</p>
+                    <p>2024-8-3 17:27</p>
+                </div>
+            </a>
+        </div>
+    </div>
 </body>
+
 </html>
