@@ -5,11 +5,12 @@ class chess {
     y;
     htmlElement;
     code;
-    constructor(name, color, x, y) {
+    constructor(name, color, x, y, code) {
         this.name = name;
         this.color = color;
         this.x = x;
         this.y = y;
+        this.code = code;
         this.init();
     }
     get position() {
@@ -73,56 +74,116 @@ class chess {
             return false;
         }
     }
+    /**
+     * @description 将数字转为对应整数
+     * @param {Number} x 
+     */
+    transform(x) {
+        if (Math.abs(x-40)<40){
+            return 40;
+        }
+        else if(Math.abs(x-120)<40){
+            return 120;
+        }
+        else if(Math.abs(x-200)<40){
+            return 200;
+        }
+        else if(Math.abs(x-280)<40){
+            return 280;
+        }
+        else if(Math.abs(x-360)<40){
+            return 360;
+        }
+        else if(Math.abs(x-440)<40){
+            return 440;
+        }
+        else if(Math.abs(x-520)<40){
+            return 520;
+        }
+        else if(Math.abs(x-600)<40){
+            return 600;
+        }
+        else if(Math.abs(x-680)<40){
+            return 680;
+        }
+        else if(Math.abs(x-760)<40){
+            return 760;
+        }
+    }
+    /**
+     * @description 移动棋子，x和y为目标位置，鼠标点击坐标，需要转为整数
+     * @param {Number} x 目标x坐标 
+     * @param {Number} y 目标y坐标
+     * 
+     */
     move(x, y) {
+        console.log(x, y);
+        x = this.transform(x);
+        y = this.transform(y);
+        console.log(x, y);
+        console.log(this.x, this.y);
+        if (x == this.x && y == this.y) {
+            return;
+        }
         if (this.examineMove(x, y)) {
-            console.log(this.x, this.y);
-            console.log(x, y);
             // 获取 circle 和 text 元素
             const circle = this.htmlElement.children[0];
             const text = this.htmlElement.children[1];
 
             // 检查元素是否存在
             if (circle && text) {
-                // 动画 circle 元素
-                circle.animate(
-                    [
-                        { cx: this.x, cy: this.y },
-                        { cx: x, cy: y },
-                    ],
-                    {
-                        duration: 1000,
-                        fill: "forwards",
-                    }
-                );
+                // // 动画 circle 元素
+                // circle.animate(
+                //     [
+                //         { cx: this.x, cy: this.y },
+                //         { cx: x, cy: y },
+                //     ],
+                //     {
+                //         duration: 1000,
+                //         fill: "forwards",
+                //     }
+                // );
 
-                // 动画 text 元素
-                text.animate(
-                    [
-                        { x: this.x, y: this.y },
-                        { x: x, y: y },
-                    ],
-                    {
-                        duration: 1000,
-                        fill: "forwards",
-                    }
-                );
-                text.setAttribute('x', x);
-                text.setAttribute('y', y);
+                // // 动画 text 元素
+                // let curX = this.x;
+                // let curY = this.y;
+                // let speedX = x == this.x ? 0 : 0.5;
+                // let speedY = y == this.y ? 0 : 0.5;
+                // let animate = setInterval(() => {
+                //     if(curX == x){
+                //         speedX = 0;
+                //     }
+                //     if(curY == y){
+                //         speedY = 0;
+                //     }
+                //     if(curX == x && curY == y) {
+                //         clearInterval(animate);
+                //     }
+                //     curX += speedX;
+                //     curY += speedY;
+                //     text.setAttribute("x", curX);
+                //     text.setAttribute("y", curY);
+                // },1)
+                circle.setAttribute("cx", x);
+                circle.setAttribute("cy", y);
+                text.setAttribute("x", x);
+                text.setAttribute("y", y);
             } else {
                 console.error("Circle or text element not found.");
             }
-            console.log(this.position);
 
             chessBoard.board[this.position[0]][this.position[1]] = -1;
             this.x = x;
             this.y = y;
             chessBoard.board[this.position[0]][this.position[1]] = this.code;
+            chessBoard.selectedChess = null;
         } else {
-            alert("不能移动到该位置");
+            console.log("不能移动到该位置");
         }
     }
 }
 
+//TODO: 车的移动判断有问题
 class car extends chess {
     constructor(name, color, x, y, code) {
         super(name, color, x, y, code);
@@ -132,7 +193,6 @@ class car extends chess {
         y = (y - 40) / 80;
         super.examineMove(x, y);
         //车走直线
-        console.log(x, y);
         const [x0, y0] = this.position;
         if (x == x0) {
             //横向移动
@@ -283,19 +343,13 @@ class advisor extends chess {
         super.examineMove(x, y);
         //士走斜线
         const [x0, y0] = this.position;
-        if (chessBoard.board[x][y] >= 0 && chessBoard.board[x][y] <= 6) {
-            return false;
-        }
         if (x > 6 || x < 3 || y > 2 || y < 0) {
+            console.log("超出范围");
             return false;
         }
-        if (x - x0 == 1 && Math.abs(y - y0) == 0) {
-            return true;
-        } else if (x - x0 == -1 && Math.abs(y - y0) == 0) {
-            return true;
-        } else if (x - x0 == 0 && y - y0 == 1) {
-            return true;
-        } else if (x - x0 == 0 && y - y0 == -1) {
+        console.log(x, y);
+        console.log(x0, y0);
+        if (Math.abs(x - x0) == 1 && Math.abs(y - y0) == 1) {
             return true;
         } else {
             return false;
@@ -307,12 +361,7 @@ class king extends chess {
     constructor(name, color, x, y, code) {
         super(name, color, x, y, code);
     }
-    /**
-     * @description 检查是否可以移动到目标位置
-     * @param {Number} x 目标x坐标
-     * @param {Number} y 目标y坐标
-     * @returns {Boolean} 是否可以移动
-     */
+
     examineMove(x, y) {
         x = (x - 40) / 80;
         y = (y - 40) / 80;
@@ -330,6 +379,7 @@ class king extends chess {
     }
 }
 
+//TODO: 炮的移动判断有问题，无法吃子
 class cannon extends chess {
     constructor(name, color, x, y, code) {
         super(name, color, x, y, code);
@@ -430,6 +480,13 @@ class chessBoard {
     //-1为空
     //0为帅，1为仕，2为相，3为傌，4为車，5为炮，6为兵
     //7为将，8为士，9为象，10为馬，11为車，12为砲，13为卒
+    /**
+     * @description 选中的棋子
+     * @type {chess}
+     */
+    static selectedChess = null;
+
+    
     chesses = [];
     static board = [
         [4, 3, 2, 1, 0, 1, 2, 3, 4],
@@ -461,7 +518,7 @@ class chessBoard {
             let initChess = new advisor("仕", "red", 280 + 160 * i, 40, 1);
             this.chesses.push(initChess);
         }
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 1; i++) {
             let initChess = new king("帥", "red", 360, 40, 0);
             this.chesses.push(initChess);
         }
@@ -509,10 +566,37 @@ class chessBoard {
         }
         this.chesses.forEach((chess) => {
             chess.htmlElement.addEventListener("click", () => {
-                console.log(chess);
+                if (chessBoard.selectedChess&&chessBoard.selectedChess.color != chess.color) {
+                    return
+                }
+                chessBoard.selectedChess = chess;
             });
         });
+        chessBoard.svg.addEventListener("click", (e) => {
+            const point = chessBoard.svg.createSVGPoint();
+            point.x = e.clientX;
+            point.y = e.clientY;
+            const svgPoint = point.matrixTransform(
+                chessBoard.svg.getScreenCTM().inverse()
+            );
+            if (chessBoard.selectedChess) {
+                try{
+                    chessBoard.selectedChess.move(svgPoint.x, svgPoint.y);
+                    console.log("try to move")
+                }
+                catch(err){
+                    if(Math.abs(e.clientX - chessBoard.selectedChess.x) < 40 && Math.abs(e.clientY - chessBoard.selectedChess.y) < 40){
+                        console.log("click on the same position")
+                    }
+                    else{
+                        chessBoard.selectedChess = null;
+                    }
+                    
+                }
+            }
+        })
     }
+
     eat() {}
 }
 
