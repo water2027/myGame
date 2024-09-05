@@ -318,7 +318,7 @@ class elephant extends chess {
         x = (x - 40) / 80;
         y = (y - 40) / 80;
         super.examineMove(x, y);
-        const state = this.color^chessBoard.user;
+        const state = this.color ^ chessBoard.user;
         if (y > 5 && state == 1) {
             return false;
         }
@@ -380,13 +380,8 @@ class advisor extends chess {
         super.examineMove(x, y);
         //士走斜线
         const [x0, y0] = this.position;
-        const state = this.color^chessBoard.user;
-        if (
-            x >= 6 ||
-            x < 3 ||
-            y > 9 - 7 * state ||
-            y < 7 - 7 * state
-        ) {
+        const state = this.color ^ chessBoard.user;
+        if (x >= 6 || x < 3 || y > 9 - 7 * state || y < 7 - 7 * state) {
             console.log("超出范围");
             return false;
         }
@@ -415,12 +410,12 @@ class king extends chess {
         //帅走直线
         const [x0, y0] = this.position;
         console.log(x, y);
-        if (x > 6 || x < 3||Math.abs(x - x0) + Math.abs(y - y0) !== 1) {
+        if (x > 6 || x < 3 || Math.abs(x - x0) + Math.abs(y - y0) !== 1) {
             console.log("超出范围");
             return false;
         }
-        const state = this.color^chessBoard.user;
-        if(y > 9 - 7 * state || y < 7 - 7 * state){
+        const state = this.color ^ chessBoard.user;
+        if (y > 9 - 7 * state || y < 7 - 7 * state) {
             console.log("超出范围了");
             return false;
         }
@@ -552,16 +547,23 @@ class soldier extends chess {
 }
 
 class chessBoard {
-    //开一个数组存放棋子
-    //-1为空
-    //0为帅，1为仕，2为相，3为傌，4为車，5为炮，6为兵
-    //7为将，8为士，9为象，10为馬，11为車，12为砲，13为卒
     /**
      * @description 选中的棋子
      * @type {chess}
      */
     static selectedChess = null;
+
+    /**
+     * @description 棋子数组,存放所有棋子
+     * @type {Array<chess>}
+     */
     static chesses = [];
+
+    /**
+     * @description 棋盘, -1表示没有棋子, 0-15表示红色棋子, 16-31表示黑色棋子
+     * @type {Array<Array<Number>>}
+     *
+     */
     static board = [
         [0, -1, -1, 11, -1, -1, 27, -1, -1, 16],
         [2, -1, 9, -1, -1, -1, -1, 25, -1, 18],
@@ -573,10 +575,36 @@ class chessBoard {
         [3, -1, 10, -1, -1, -1, -1, 26, -1, 19],
         [1, -1, -1, 15, -1, -1, 31, -1, -1, 17],
     ];
+
     static svg = document.getElementById("svg");
+
+    /**
+     * @description 当前用户, 0为黑色, 1为红色
+     */
     static user = 0;
+
     static changeUser() {
         chessBoard.user = 1 - chessBoard.user;
+    }
+    restart() {
+        chessBoard.chesses.forEach((chess) => {
+            chess.htmlElement.remove();
+        });
+        chessBoard.chesses = [];
+        chessBoard.board = [
+            [0, -1, -1, 11, -1, -1, 27, -1, -1, 16],
+            [2, -1, 9, -1, -1, -1, -1, 25, -1, 18],
+            [4, -1, -1, 12, -1, -1, 28, -1, -1, 20],
+            [6, -1, -1, -1, -1, -1, -1, -1, -1, 22],
+            [8, -1, -1, 13, -1, -1, 29, -1, -1, 24],
+            [7, -1, -1, -1, -1, -1, -1, -1, -1, 23],
+            [5, -1, -1, 14, -1, -1, 30, -1, -1, 21],
+            [3, -1, 10, -1, -1, -1, -1, 26, -1, 19],
+            [1, -1, -1, 15, -1, -1, 31, -1, -1, 17],
+        ];
+        chessBoard.chesses = [];
+        chessBoard.selectedChess = null;
+        board.init();
     }
     init() {
         for (let i = 0; i < 2; i++) {
@@ -759,3 +787,18 @@ class chessBoard {
 let board = new chessBoard();
 chessBoard.changeUser();
 board.init();
+
+const ws = new WebSocket("ws://localhost:3000");
+ws.onopen = () => {
+    console.log("connected");
+};
+ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if (data.type === "move") {
+        const chess = chessBoard.chesses[data.id];
+        chess.move(data.x, data.y);
+    } else if (data.type === "restart") {
+        board.restart();
+        chessBoard.changeUser();
+    }
+};
