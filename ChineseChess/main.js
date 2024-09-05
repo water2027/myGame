@@ -1,13 +1,11 @@
 class chess {
-    name;
-    color;
+    realColor;
     x;
     y;
     htmlElement;
     code;
-    constructor(name, color, x, y, code) {
-        this.name = name;
-        this.color = color;
+    constructor(color, x, y, code) {
+        this.realColor = color;
         this.x = x;
         this.y = y;
         this.code = code;
@@ -23,7 +21,7 @@ class chess {
      * @returns {Number} 1为红色，0为黑色
      */
     get color() {
-        return Number(this.code < 7);
+        return Number(this.code < 16);
     }
 
     init() {
@@ -34,7 +32,7 @@ class chess {
         chessCircle.setAttribute("cx", this.x);
         chessCircle.setAttribute("cy", this.y);
         chessCircle.setAttribute("r", 40);
-        chessCircle.setAttribute("fill", this.color);
+        chessCircle.setAttribute("fill", this.realColor);
         chessCircle.setAttribute("stroke", "black");
         chessCircle.setAttribute("stroke-width", 1);
         chessCircle.setAttribute("class", "chess");
@@ -55,6 +53,8 @@ class chess {
         );
         this.htmlElement.appendChild(chessCircle);
         this.htmlElement.appendChild(chessText);
+        this.htmlElement.setAttribute("color", this.color);
+        this.htmlElement.setAttribute("id", this.code);
         chessBoard.svg.appendChild(this.htmlElement);
     }
 
@@ -71,57 +71,49 @@ class chess {
             chessBoard.board[x][y] >= 7 - color * 7 &&
             chessBoard.board[x][y] <= 13 - color * 7
         ) {
+            console.log("不能移动到自己的位置");
             return false;
         }
     }
     /**
      * @description 将数字转为对应整数
-     * @param {Number} x 
+     * @param {Number} x
      */
     transform(x) {
-        if (Math.abs(x-40)<40){
+        if (Math.abs(x - 40) < 40) {
             return 40;
-        }
-        else if(Math.abs(x-120)<40){
+        } else if (Math.abs(x - 120) < 40) {
             return 120;
-        }
-        else if(Math.abs(x-200)<40){
+        } else if (Math.abs(x - 200) < 40) {
             return 200;
-        }
-        else if(Math.abs(x-280)<40){
+        } else if (Math.abs(x - 280) < 40) {
             return 280;
-        }
-        else if(Math.abs(x-360)<40){
+        } else if (Math.abs(x - 360) < 40) {
             return 360;
-        }
-        else if(Math.abs(x-440)<40){
+        } else if (Math.abs(x - 440) < 40) {
             return 440;
-        }
-        else if(Math.abs(x-520)<40){
+        } else if (Math.abs(x - 520) < 40) {
             return 520;
-        }
-        else if(Math.abs(x-600)<40){
+        } else if (Math.abs(x - 600) < 40) {
             return 600;
-        }
-        else if(Math.abs(x-680)<40){
+        } else if (Math.abs(x - 680) < 40) {
             return 680;
-        }
-        else if(Math.abs(x-760)<40){
+        } else if (Math.abs(x - 760) < 40) {
             return 760;
         }
     }
     /**
      * @description 移动棋子，x和y为目标位置，鼠标点击坐标，需要转为整数
-     * @param {Number} x 目标x坐标 
+     * @param {Number} x 目标x坐标
      * @param {Number} y 目标y坐标
-     * 
+     *
      */
     move(x, y) {
-        console.log(x, y);
+        // console.log(x, y);
         x = this.transform(x);
         y = this.transform(y);
-        console.log(x, y);
-        console.log(this.x, this.y);
+        // console.log(x, y);
+        // console.log(this.x, this.y);
         if (x == this.x && y == this.y) {
             return;
         }
@@ -171,24 +163,38 @@ class chess {
             } else {
                 console.error("Circle or text element not found.");
             }
-
             chessBoard.board[this.position[0]][this.position[1]] = -1;
             this.x = x;
             this.y = y;
+            x = (x - 40) / 80;
+            y = (y - 40) / 80;
+            if (chessBoard.board[x][y] != -1) {
+                this.eat(x, y);
+            }
             chessBoard.board[this.position[0]][this.position[1]] = this.code;
             chessBoard.selectedChess = null;
         } else {
+            chessBoard.selectedChess = null;
             console.log("不能移动到该位置");
         }
     }
-}
 
-//TODO: 车的移动判断有问题
+    eat(x, y) {
+        let target = chessBoard.board[x][y];
+        let targetChess = chessBoard.chesses[target];
+        targetChess.htmlElement.remove();
+        chessBoard.chesses[target] = null;
+    }
+}
 class car extends chess {
-    constructor(name, color, x, y, code) {
-        super(name, color, x, y, code);
+    constructor(color, x, y, code) {
+        super(color, x, y, code);
+    }
+    get name() {
+        return this.code < 16 ? "俥" : "車";
     }
     examineMove(x, y) {
+        console.log("examineMove");
         x = (x - 40) / 80;
         y = (y - 40) / 80;
         super.examineMove(x, y);
@@ -221,8 +227,11 @@ class car extends chess {
 }
 
 class horse extends chess {
-    constructor(name, color, x, y, code) {
-        super(name, color, x, y, code);
+    constructor(color, x, y, code) {
+        super(color, x, y, code);
+    }
+    get name() {
+        return this.code < 16 ? "傌" : "馬";
     }
     /**
      * @description 检查是否可以移动到目标位置
@@ -235,18 +244,27 @@ class horse extends chess {
         y = (y - 40) / 80;
         super.examineMove(x, y);
         //马走日
-        //蹩马腿
         const [x0, y0] = this.position;
+        if (Math.pow(x - x0, 2) + Math.pow(y - y0, 2) != 5) {
+            return false;
+        }
+        //蹩马腿
         if (x > x0) {
             //往右移动
-            if (y - y0 == 2 || y - y0 == -2) {
-                if (chessBoard.board[x0 + 1][y0] == -1) {
+            if (y - y0 == 2) {
+                if (chessBoard.board[x0][y0 + 1] == -1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else if (y - y0 == -2) {
+                if (chessBoard.board[x0][y0 - 1] == -1) {
                     return true;
                 } else {
                     return false;
                 }
             } else if (y - y0 == 1 || y - y0 == -1) {
-                if (chessBoard.board[x0][y0 + 1] == -1) {
+                if (chessBoard.board[x0 + 1][y0] == -1) {
                     return true;
                 } else {
                     return false;
@@ -256,14 +274,20 @@ class horse extends chess {
             }
         } else if (x < x0) {
             //往左移动
-            if (y - y0 == 2 || y - y0 == -2) {
-                if (chessBoard.board[x0 - 1][y0] == -1) {
+            if (y - y0 == 2) {
+                if (chessBoard.board[x0][y0 + 1] == -1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else if (y - y0 == -2) {
+                if (chessBoard.board[x0][y0 - 1] == -1) {
                     return true;
                 } else {
                     return false;
                 }
             } else if (y - y0 == 1 || y - y0 == -1) {
-                if (chessBoard.board[x0][y0 + 1] == -1) {
+                if (chessBoard.board[x0 - 1][y0] == -1) {
                     return true;
                 } else {
                     return false;
@@ -278,8 +302,11 @@ class horse extends chess {
 }
 
 class elephant extends chess {
-    constructor(name, color, x, y, code) {
-        super(name, color, x, y, code);
+    constructor(color, x, y, code) {
+        super(color, x, y, code);
+    }
+    get name() {
+        return this.code < 16 ? "相" : "象";
     }
     /**
      * @description 检查是否可以移动到目标位置
@@ -291,6 +318,13 @@ class elephant extends chess {
         x = (x - 40) / 80;
         y = (y - 40) / 80;
         super.examineMove(x, y);
+        const state = this.color^chessBoard.user;
+        if (y > 5 && state == 1) {
+            return false;
+        }
+        if (y <= 4 && state == 0) {
+            return false;
+        }
         //象走田
         const [x0, y0] = this.position;
         if (x > x0 && y > y0) {
@@ -328,8 +362,11 @@ class elephant extends chess {
 }
 
 class advisor extends chess {
-    constructor(name, color, x, y, code) {
-        super(name, color, x, y, code);
+    constructor(color, x, y, code) {
+        super(color, x, y, code);
+    }
+    get name() {
+        return this.code < 16 ? "仕" : "士";
     }
     /**
      * @description 检查是否可以移动到目标位置
@@ -343,7 +380,13 @@ class advisor extends chess {
         super.examineMove(x, y);
         //士走斜线
         const [x0, y0] = this.position;
-        if (x > 6 || x < 3 || y > 2 || y < 0) {
+        const state = this.color^chessBoard.user;
+        if (
+            x >= 6 ||
+            x < 3 ||
+            y > 9 - 7 * state ||
+            y < 7 - 7 * state
+        ) {
             console.log("超出范围");
             return false;
         }
@@ -358,31 +401,39 @@ class advisor extends chess {
 }
 
 class king extends chess {
-    constructor(name, color, x, y, code) {
-        super(name, color, x, y, code);
+    constructor(color, x, y, code) {
+        super(color, x, y, code);
     }
 
+    get name() {
+        return this.code < 16 ? "帥" : "将";
+    }
     examineMove(x, y) {
         x = (x - 40) / 80;
         y = (y - 40) / 80;
         super.examineMove(x, y);
         //帅走直线
         const [x0, y0] = this.position;
-        if (x > 6 || x < 3 || y > 2 || y < 0) {
+        console.log(x, y);
+        if (x > 6 || x < 3||Math.abs(x - x0) + Math.abs(y - y0) !== 1) {
+            console.log("超出范围");
             return false;
         }
-        if (Math.abs(x - x0) + Math.abs(y - y0) == 1) {
-            return true;
-        } else {
+        const state = this.color^chessBoard.user;
+        if(y > 9 - 7 * state || y < 7 - 7 * state){
+            console.log("超出范围了");
             return false;
         }
+        return true;
     }
 }
 
-//TODO: 炮的移动判断有问题，无法吃子
 class cannon extends chess {
-    constructor(name, color, x, y, code) {
-        super(name, color, x, y, code);
+    constructor(color, x, y, code) {
+        super(color, x, y, code);
+    }
+    get name() {
+        return this.code < 16 ? "炮" : "砲";
     }
 
     examineMove(x, y) {
@@ -392,7 +443,7 @@ class cannon extends chess {
         //炮走直线
         const [x0, y0] = this.position;
         if (x == x0) {
-            //横向移动
+            //纵向移动
             let min = Math.min(y, y0);
             let max = Math.max(y, y0);
             let count = 0;
@@ -405,17 +456,19 @@ class cannon extends chess {
                 if (count == 0) {
                     return true;
                 } else {
+                    console.log("挡住了");
                     return false;
                 }
             } else {
                 if (count == 1) {
                     return true;
                 } else {
+                    console.log("中间至少有两个子");
                     return false;
                 }
             }
         } else if (y == y0) {
-            //纵向移动
+            //横向移动
             let min = Math.min(x, x0);
             let max = Math.max(x, x0);
             let count = 0;
@@ -444,8 +497,11 @@ class cannon extends chess {
 }
 
 class soldier extends chess {
-    constructor(name, color, x, y, code) {
-        super(name, color, x, y, code);
+    constructor(color, x, y, code) {
+        super(color, x, y, code);
+    }
+    get name() {
+        return this.code < 16 ? "兵" : "卒";
     }
     examineMove(x, y) {
         x = (x - 40) / 80;
@@ -455,21 +511,41 @@ class soldier extends chess {
         const [x0, y0] = this.position;
         if (this.color == 1) {
             //红色
-            if (x - x0 == 1 && y - y0 == 0) {
-                return true;
-            } else if (x - x0 == 0 && Math.abs(y - y0) == 1) {
-                return true;
+            if (chessBoard.user == 0) {
+                if (y0 > 4 && Math.abs(x - x0) == 1 && y - y0 == 0) {
+                    return true;
+                } else if (x - x0 == 0 && y - y0 == 1) {
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
-                return false;
+                if (y0 <= 4 && Math.abs(x - x0) == 1 && y - y0 == 0) {
+                    return true;
+                } else if (x - x0 == 0 && y - y0 == -1) {
+                    return true;
+                } else {
+                    return false;
+                }
             }
         } else {
             //黑色
-            if (x - x0 == -1 && y - y0 == 0) {
-                return true;
-            } else if (x - x0 == 0 && Math.abs(y - y0) == 1) {
-                return true;
+            if (chessBoard.user == 0) {
+                if (y0 <= 4 && Math.abs(x - x0) == 1 && y - y0 == 0) {
+                    return true;
+                } else if (x - x0 == 0 && y - y0 == -1) {
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
-                return false;
+                if (y0 > 4 && Math.abs(x - x0) == 1 && y - y0 == 0) {
+                    return true;
+                } else if (x - x0 == 0 && y - y0 == 1) {
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
     }
@@ -485,93 +561,150 @@ class chessBoard {
      * @type {chess}
      */
     static selectedChess = null;
-
-    
-    chesses = [];
+    static chesses = [];
     static board = [
-        [4, 3, 2, 1, 0, 1, 2, 3, 4],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, 5, -1, -1, -1, -1, -1, 5, -1],
-        [6, -1, 6, -1, 6, -1, 6, -1, 6],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [13, -1, 13, -1, 13, -1, 13, -1, 13],
-        [-1, 12, -1, -1, -1, -1, -1, 12, -1],
-        [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-        [11, 10, 9, 8, 5, 8, 9, 10, 11],
+        [0, -1, -1, 11, -1, -1, 27, -1, -1, 16],
+        [2, -1, 9, -1, -1, -1, -1, 25, -1, 18],
+        [4, -1, -1, 12, -1, -1, 28, -1, -1, 20],
+        [6, -1, -1, -1, -1, -1, -1, -1, -1, 22],
+        [8, -1, -1, 13, -1, -1, 29, -1, -1, 24],
+        [7, -1, -1, -1, -1, -1, -1, -1, -1, 23],
+        [5, -1, -1, 14, -1, -1, 30, -1, -1, 21],
+        [3, -1, 10, -1, -1, -1, -1, 26, -1, 19],
+        [1, -1, -1, 15, -1, -1, 31, -1, -1, 17],
     ];
     static svg = document.getElementById("svg");
+    static user = 0;
+    static changeUser() {
+        chessBoard.user = 1 - chessBoard.user;
+    }
     init() {
         for (let i = 0; i < 2; i++) {
-            let initChess = new car("車", "red", 40 + 640 * i, 40, 4);
-            this.chesses.push(initChess);
+            let initChess = new car(
+                "red",
+                40 + 640 * i,
+                40 + chessBoard.user * 720,
+                i
+            );
+            chessBoard.chesses.push(initChess);
         }
         for (let i = 0; i < 2; i++) {
-            let initChess = new horse("傌", "red", 120 + 480 * i, 40, 3);
-            this.chesses.push(initChess);
-        }
-        for (let i = 0; i < 2; i++) {
-            let initChess = new elephant("相", "red", 200 + 320 * i, 40, 2);
-            this.chesses.push(initChess);
-        }
-        for (let i = 0; i < 2; i++) {
-            let initChess = new advisor("仕", "red", 280 + 160 * i, 40, 1);
-            this.chesses.push(initChess);
-        }
-        for (let i = 0; i < 1; i++) {
-            let initChess = new king("帥", "red", 360, 40, 0);
-            this.chesses.push(initChess);
-        }
-        for (let i = 0; i < 2; i++) {
-            let initChess = new cannon("炮", "red", 120 + 480 * i, 200, 5);
-            this.chesses.push(initChess);
-        }
-        for (let i = 0; i < 5; i++) {
-            let initChess = new soldier("兵", "red", 40 + 160 * i, 280, 6);
-            this.chesses.push(initChess);
-        }
-        for (let i = 0; i < 2; i++) {
-            let initChess = new car("車", "#5a5a5a", 40 + 640 * i, 760, 11);
-            this.chesses.push(initChess);
-        }
-        for (let i = 0; i < 2; i++) {
-            let initChess = new horse("馬", "#5a5a5a", 120 + 480 * i, 760, 10);
-            this.chesses.push(initChess);
+            let initChess = new horse(
+                "red",
+                120 + 480 * i,
+                40 + chessBoard.user * 720,
+                2 + i
+            );
+            chessBoard.chesses.push(initChess);
         }
         for (let i = 0; i < 2; i++) {
             let initChess = new elephant(
-                "象",
-                "#5a5a5a",
+                "red",
                 200 + 320 * i,
-                760,
-                9
+                40 + chessBoard.user * 720,
+                4 + i
             );
-            this.chesses.push(initChess);
+            chessBoard.chesses.push(initChess);
         }
         for (let i = 0; i < 2; i++) {
-            let initChess = new advisor("士", "#5a5a5a", 280 + 160 * i, 760, 8);
-            this.chesses.push(initChess);
+            let initChess = new advisor(
+                "red",
+                280 + 160 * i,
+                40 + chessBoard.user * 720,
+                6 + i
+            );
+            chessBoard.chesses.push(initChess);
+        }
+        for (let i = 0; i < 1; i++) {
+            let initChess = new king("red", 360, 40 + chessBoard.user * 720, 8);
+            chessBoard.chesses.push(initChess);
         }
         for (let i = 0; i < 2; i++) {
-            let initChess = new king("将", "#5a5a5a", 360, 760, 7);
-            this.chesses.push(initChess);
-        }
-        for (let i = 0; i < 2; i++) {
-            let initChess = new cannon("砲", "#5a5a5a", 120 + 480 * i, 600, 12);
-            this.chesses.push(initChess);
+            let initChess = new cannon(
+                "red",
+                120 + 480 * i,
+                200 + chessBoard.user * 400,
+                9 + i
+            );
+            chessBoard.chesses.push(initChess);
         }
         for (let i = 0; i < 5; i++) {
-            let initChess = new soldier("卒", "#5a5a5a", 40 + 160 * i, 520, 13);
-            this.chesses.push(initChess);
+            let initChess = new soldier(
+                "red",
+                40 + 160 * i,
+                280 + chessBoard.user * 240,
+                11 + i
+            );
+            chessBoard.chesses.push(initChess);
         }
-        this.chesses.forEach((chess) => {
-            chess.htmlElement.addEventListener("click", () => {
-                if (chessBoard.selectedChess&&chessBoard.selectedChess.color != chess.color) {
-                    return
-                }
-                chessBoard.selectedChess = chess;
+        for (let i = 0; i < 2; i++) {
+            let initChess = new car(
+                "#5a5a5a",
+                40 + 640 * i,
+                760 - chessBoard.user * 720,
+                16 + i
+            );
+            chessBoard.chesses.push(initChess);
+        }
+        for (let i = 0; i < 2; i++) {
+            let initChess = new horse(
+                "#5a5a5a",
+                120 + 480 * i,
+                760 - chessBoard.user * 720,
+                18 + i
+            );
+            chessBoard.chesses.push(initChess);
+        }
+        for (let i = 0; i < 2; i++) {
+            let initChess = new elephant(
+                "#5a5a5a",
+                200 + 320 * i,
+                760 - chessBoard.user * 720,
+                20 + i
+            );
+            chessBoard.chesses.push(initChess);
+        }
+        for (let i = 0; i < 2; i++) {
+            let initChess = new advisor(
+                "#5a5a5a",
+                280 + 160 * i,
+                760 - chessBoard.user * 720,
+                22 + i
+            );
+            chessBoard.chesses.push(initChess);
+        }
+        for (let i = 0; i < 1; i++) {
+            let initChess = new king(
+                "#5a5a5a",
+                360,
+                760 - chessBoard.user * 720,
+                24
+            );
+            chessBoard.chesses.push(initChess);
+        }
+        for (let i = 0; i < 2; i++) {
+            let initChess = new cannon(
+                "#5a5a5a",
+                120 + 480 * i,
+                600 - chessBoard.user * 400,
+                25 + i
+            );
+            chessBoard.chesses.push(initChess);
+        }
+        for (let i = 0; i < 5; i++) {
+            let initChess = new soldier(
+                "#5a5a5a",
+                40 + 160 * i,
+                520 - chessBoard.user * 240,
+                27 + i
+            );
+            chessBoard.chesses.push(initChess);
+        }
+
+        chessBoard.user === 1 &&
+            chessBoard.board.forEach((row) => {
+                row.reverse();
             });
-        });
         chessBoard.svg.addEventListener("click", (e) => {
             const point = chessBoard.svg.createSVGPoint();
             point.x = e.clientX;
@@ -579,26 +712,50 @@ class chessBoard {
             const svgPoint = point.matrixTransform(
                 chessBoard.svg.getScreenCTM().inverse()
             );
-            if (chessBoard.selectedChess) {
-                try{
-                    chessBoard.selectedChess.move(svgPoint.x, svgPoint.y);
-                    console.log("try to move")
-                }
-                catch(err){
-                    if(Math.abs(e.clientX - chessBoard.selectedChess.x) < 40 && Math.abs(e.clientY - chessBoard.selectedChess.y) < 40){
-                        console.log("click on the same position")
-                    }
-                    else{
-                        chessBoard.selectedChess = null;
-                    }
-                    
-                }
+            let target = e.target;
+            if (target.tagName === "circle" || target.tagName === "text") {
+                target = target.parentNode;
             }
-        })
+            if (chessBoard.selectedChess) {
+                if (
+                    chessBoard.selectedChess.color ==
+                    target.getAttribute("color")
+                ) {
+                    chessBoard.selectedChess =
+                        chessBoard.chesses[Number(target.getAttribute("id"))];
+                    console.log(chessBoard.selectedChess);
+                    return;
+                }
+                try {
+                    chessBoard.selectedChess.move(svgPoint.x, svgPoint.y);
+                    console.log("try to move");
+                } catch (err) {
+                    console.log(err);
+                    if (
+                        Math.abs(svgPoint.x - chessBoard.selectedChess.x) <
+                            40 &&
+                        Math.abs(svgPoint.y - chessBoard.selectedChess.y) < 40
+                    ) {
+                        console.log("click on the same position");
+                    } else {
+                        console.log(svgPoint.x, svgPoint.y);
+                        console.log(
+                            chessBoard.selectedChess.x,
+                            chessBoard.selectedChess.y
+                        );
+                        console.log("move error");
+                    }
+                    chessBoard.selectedChess = null;
+                }
+            } else {
+                //TODO:根据用户颜色判断
+                chessBoard.selectedChess =
+                    chessBoard.chesses[Number(target.getAttribute("id"))];
+            }
+        });
     }
-
-    eat() {}
 }
 
 let board = new chessBoard();
+chessBoard.changeUser();
 board.init();
