@@ -791,6 +791,7 @@ board.init();
 const ws = new WebSocket("ws://localhost:3000");
 ws.onopen = () => {
     console.log("connected");
+    ws.send()
 };
 ws.onmessage = (e) => {
     const data = JSON.parse(e.data);

@@ -36,9 +36,7 @@ body {
         height: auto;
     }
 }
-/* svg{
-    rotate: 180deg;
-} */
+
 .selected{
     position: relative;
 }
